@@ -204,8 +204,8 @@
                     <div class="h-48 sm:h-56"><canvas id="chartTrend"></canvas></div>
                 </div>
             </div>
-                        </section>
-                                <!-- VIEW 2: TRACKER (KANBAN) -->
+        </section>
+                <!-- VIEW 2: TRACKER (KANBAN) -->
         <section id="view-kanban" class="hidden">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <!-- Status Columns -->
@@ -277,11 +277,11 @@
 
     </main>
 
-    <!-- NEW / EDIT ORDER MODAL (MOBILE RESPONSIVE FIX) -->
+    <!-- NEW / EDIT ORDER MODAL -->
     <div id="orderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 hidden">
         <div class="bg-white dark:bg-slate-800 w-full max-w-xl rounded-xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
             <div class="p-3 sm:p-4 bg-amazon-navy text-white flex justify-between items-center">
-                <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2"><i class="fa-solid fa-cart-plus text-amazon-orange"></i> Create New Hospitality Order</h3>
+                <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2"><i class="fa-solid fa-cart-plus text-amazon-orange"></i> Create / Edit Order</h3>
                 <button onclick="closeOrderModal()" class="text-gray-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-base sm:text-lg"></i></button>
             </div>
             
@@ -308,7 +308,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                         <label class="block font-semibold mb-1">Event Type *</label>
                         <select id="formEventType" required class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-amazon-orange focus:outline-none">
@@ -324,6 +324,17 @@
                             <option value="Normal">Normal</option>
                             <option value="High">High Priority</option>
                             <option value="Urgent">Urgent / VIP</option>
+                        </select>
+                    </div>
+                    <!-- Order Status Option Added Here -->
+                    <div>
+                        <label class="block font-semibold mb-1">Order Status *</label>
+                        <select id="formStatus" required class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-amazon-orange focus:outline-none font-bold text-amazon-blue">
+                            <option value="Pending">Pending</option>
+                            <option value="Preparing">Preparing</option>
+                            <option value="Ready">Ready</option>
+                            <option value="Dispatched">Dispatched</option>
+                            <option value="Completed">Completed</option>
                         </select>
                     </div>
                 </div>
@@ -396,8 +407,8 @@
                 </button>
             </div>
         </div>
-    </div>
-        <!-- JAVASCRIPT LOGIC -->
+            </div>
+                <!-- JAVASCRIPT LOGIC -->
     <script>
         // INITIAL STATE & MOCK DATA
         let orders = [
@@ -648,13 +659,13 @@
                 renderAllViews();
             }
         }
-            // TABLE RENDER
+                // TABLE RENDER
         function renderTable() {
             const tbody = document.getElementById('ordersTableBody');
             const filtered = getFilteredOrders();
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400">No matching orders found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400">No orders found.</td></tr>`;
                 return;
             }
 
@@ -666,30 +677,179 @@
                 'Completed': 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
             };
 
-            tbody.innerHTML = filtered.map(o => `
-                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
-                    <td class="p-3 font-mono font-bold text-amazon-blue dark:text-amazon-orange">${o.id}</td>
-                    <td class="p-3">
-                        <div class="font-bold text-slate-800 dark:text-slate-100">${o.requester}</div>
-                        <div class="text-[10px] text-gray-400">${o.eventType}</div>
-                    </td>
-                    <td class="p-3">${o.floor}, ${o.room}</td>
-                    <td class="p-3">
-                        <div class="max-w-xs truncate">${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</div>
-                    </td>
-                    <td class="p-3 font-semibold text-amazon-blue">${o.time}</td>
-                    <td class="p-3">
-                        <span class="px-2 py-1 rounded text-[10px] font-bold ${statusBadges[o.status]}">${o.status}</span>
-                    </td>
-                    <td class="p-3 text-right space-x-2">
-                        <button onclick="openSlipModal('${o.id}')" class="p-1.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 rounded text-xs font-semibold"><i class="fa-solid fa-qrcode mr-1"></i>Slip</button>
-                        ${currentRole === 'Admin' ? `
-                            <button onclick="editOrder('${o.id}')" class="p-1 text-gray-400 hover:text-blue-500"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteOrder('${o.id}')" class="p-1 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                        ` : ''}
-                    </td>
-                </tr>
+            tbody.innerHTML = filtered.map(o => {
+                const itemSummary = o.items.map(i => `${i.name} (x${i.qty})`).join(', ');
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition">
+                        <td class="p-3 font-mono font-bold text-amazon-blue dark:text-amazon-orange">${o.id}</td>
+                        <td class="p-3">
+                            <div class="font-bold">${o.requester}</div>
+                            <div class="text-[10px] text-gray-400">${o.eventType}</div>
+                        </td>
+                        <td class="p-3">
+                            <div>${o.floor}</div>
+                            <div class="text-[10px] text-gray-400">${o.room}</div>
+                        </td>
+                        <td class="p-3 max-w-xs truncate" title="${itemSummary}">${itemSummary}</td>
+                        <td class="p-3 font-bold">${o.time}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusBadges[o.status]}">${o.status}</span>
+                        </td>
+                        <td class="p-3 text-right space-x-2">
+                            <button onclick="openSlipModal('${o.id}')" class="text-amazon-blue hover:underline font-semibold text-xs"><i class="fa-solid fa-qrcode"></i> Slip</button>
+                            ${currentRole === 'Admin' ? `
+                                <button onclick="editOrder('${o.id}')" class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteOrder('${o.id}')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // MODAL MANAGEMENT & CUSTOM TEXT ITEM ROWS
+        function openOrderModal() {
+            document.getElementById('editOrderId').value = '';
+            document.getElementById('orderForm').reset();
+            document.getElementById('itemRows').innerHTML = '';
+            document.getElementById('formStatus').value = 'Pending'; // Default Status
+            addItemRow(); 
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+        }
+
+        function addItemRow(name = '', qty = 1) {
+            const container = document.getElementById('itemRows');
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2 item-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Item Name (e.g. Masala Chai, Veg Sandwich)" value="${name}" required class="flex-1 p-2 text-xs border rounded dark:bg-slate-700 dark:border-slate-600 focus:ring-1 focus:ring-amazon-orange focus:outline-none">
+                <input type="number" min="1" value="${qty}" required class="w-16 p-2 text-xs border rounded dark:bg-slate-700 dark:border-slate-600 focus:ring-1 focus:ring-amazon-orange focus:outline-none">
+                <button type="button" onclick="this.parentElement.remove()" class="p-2 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editOrderId').value;
+            const requester = document.getElementById('formRequester').value;
+            const floor = document.getElementById('formFloor').value;
+            const room = document.getElementById('formRoom').value;
+            const time = document.getElementById('formTime').value;
+            const eventType = document.getElementById('formEventType').value;
+            const priority = document.getElementById('formPriority').value;
+            const status = document.getElementById('formStatus').value; // Get selected status
+            const notes = document.getElementById('formNotes').value;
+
+            const items = [];
+            document.querySelectorAll('.item-row').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs[0].value.trim() !== '') {
+                    items.push({ name: inputs[0].value.trim(), qty: Number(inputs[1].value) });
+                }
+            });
+
+            if (items.length === 0) {
+                alert("Please add at least one order item.");
+                return;
+            }
+
+            if (editId) {
+                // Update Order
+                const idx = orders.findIndex(o => o.id === editId);
+                if (idx !== -1) {
+                    orders[idx] = { ...orders[idx], requester, floor, room, time, eventType, priority, status, items, notes };
+                    addNotification(`Order ${editId} updated.`);
+                }
+            } else {
+                // New Order
+                const newId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+                orders.unshift({
+                    id: newId,
+                    requester,
+                    floor,
+                    room,
+                    time,
+                    eventType,
+                    priority,
+                    status, // Set chosen status from dropdown
+                    items,
+                    notes,
+                    timestamp: new Date().toISOString()
+                });
+                addNotification(`New order created: ${newId}`);
+            }
+
+            closeOrderModal();
+            renderAllViews();
+        }
+
+        function editOrder(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            document.getElementById('editOrderId').value = order.id;
+            document.getElementById('formRequester').value = order.requester;
+            document.getElementById('formFloor').value = order.floor;
+            document.getElementById('formRoom').value = order.room;
+            document.getElementById('formTime').value = order.time;
+            document.getElementById('formEventType').value = order.eventType;
+            document.getElementById('formPriority').value = order.priority;
+            document.getElementById('formStatus').value = order.status; // Set existing status in form
+            document.getElementById('formNotes').value = order.notes;
+
+            const container = document.getElementById('itemRows');
+            container.innerHTML = '';
+            order.items.forEach(item => addItemRow(item.name, item.qty));
+
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+
+        function deleteOrder(id) {
+            if (confirm(`Are you sure you want to delete order ${id}?`)) {
+                orders = orders.filter(o => o.id !== id);
+                addNotification(`Order ${id} deleted.`);
+                renderAllViews();
+            }
+        }
+
+        // SLIP & QR CODE GENERATION
+        function openSlipModal(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            document.getElementById('slipOrderId').textContent = order.id;
+            document.getElementById('slipRequester').textContent = order.requester;
+            document.getElementById('slipLocation').textContent = `${order.floor}, ${order.room}`;
+            document.getElementById('slipTime').textContent = order.time;
+            document.getElementById('slipNotes').textContent = order.notes || 'None';
+
+            const itemsList = document.getElementById('slipItems');
+            itemsList.innerHTML = order.items.map(i => `
+                <li class="flex justify-between border-b border-gray-100 dark:border-slate-700/50 py-1">
+                    <span>${i.name}</span>
+                    <span class="font-bold">x${i.qty}</span>
+                </li>
             `).join('');
+
+            // Generate QR Code
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: JSON.stringify({ id: order.id, status: order.status, requester: order.requester }),
+                width: 100,
+                height: 100
+            });
+
+            document.getElementById('slipModal').classList.remove('hidden');
+        }
+
+        function closeSlipModal() {
+            document.getElementById('slipModal').classList.add('hidden');
         }
 
         // CHARTS LOGIC
@@ -715,7 +875,7 @@
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Quantity Ordered',
+                        label: 'Total Qty',
                         data: [],
                         backgroundColor: '#ff9900'
                     }]
@@ -729,200 +889,43 @@
                     labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
                     datasets: [{
                         label: 'Orders',
-                        data: [2, 5, 8, 4, 6, 3],
+                        data: [1, 3, 2, 5, 4, 2],
                         borderColor: '#007185',
                         tension: 0.3,
                         fill: false
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
         function updateCharts() {
+            if (!statusChart) return;
+
             const filtered = getFilteredOrders();
 
-            // 1. Status Data
+            // Status Chart Update
             const statuses = ['Pending', 'Preparing', 'Ready', 'Dispatched', 'Completed'];
-            const counts = statuses.map(st => filtered.filter(o => o.status === st).length);
-            statusChart.data.datasets[0].data = counts;
+            statusChart.data.datasets[0].data = statuses.map(s => filtered.filter(o => o.status === s).length);
             statusChart.update();
 
-            // 2. Items Aggregate Data
-            const itemMap = {};
+            // Top Items Chart Update
+            const itemCounts = {};
             filtered.forEach(o => {
                 o.items.forEach(i => {
-                    itemMap[i.name] = (itemMap[i.name] || 0) + Number(i.qty);
+                    itemCounts[i.name] = (itemCounts[i.name] || 0) + Number(i.qty);
                 });
             });
 
-            itemsChart.data.labels = Object.keys(itemMap);
-            itemsChart.data.datasets[0].data = Object.values(itemMap);
+            itemsChart.data.labels = Object.keys(itemCounts);
+            itemsChart.data.datasets[0].data = Object.values(itemCounts);
             itemsChart.update();
         }
 
         function updateChartsTheme() {
-            const isDark = document.documentElement.classList.contains('dark');
-            const color = isDark ? '#94a3b8' : '#64748b';
-            
-            [statusChart, itemsChart, trendChart].forEach(chart => {
-                if(chart.options.plugins.legend) chart.options.plugins.legend.labels.color = color;
-                chart.update();
-            });
-        }
-
-        // ORDER FORM MODAL LOGIC
-        function openOrderModal(editId = null) {
-            document.getElementById('orderForm').reset();
-            document.getElementById('editOrderId').value = '';
-            document.getElementById('itemRows').innerHTML = '';
-
-            if (editId) {
-                const order = orders.find(o => o.id === editId);
-                if (order) {
-                    document.getElementById('editOrderId').value = order.id;
-                    document.getElementById('formRequester').value = order.requester;
-                    document.getElementById('formFloor').value = order.floor;
-                    document.getElementById('formRoom').value = order.room;
-                    document.getElementById('formTime').value = order.time;
-                    document.getElementById('formEventType').value = order.eventType;
-                    document.getElementById('formPriority').value = order.priority;
-                    document.getElementById('formNotes').value = order.notes;
-
-                    order.items.forEach(item => addItemRow(item.name, item.qty));
-                }
-            } else {
-                // Add two default empty rows for new order
-                addItemRow();
-            }
-
-            document.getElementById('orderModal').classList.remove('hidden');
-        }
-
-        function closeOrderModal() {
-            document.getElementById('orderModal').classList.add('hidden');
-        }
-
-        function addItemRow(name = '', qty = 1) {
-            const container = document.getElementById('itemRows');
-            const rowId = Date.now() + Math.random();
-            const div = document.createElement('div');
-            div.className = "flex items-center space-x-2";
-            div.id = `row-${rowId}`;
-            div.innerHTML = `
-                <input type="text" placeholder="Item name (e.g. Masala Chai, Cookies)" value="${name}" required class="item-name flex-1 p-1.5 border rounded dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-amazon-orange text-xs sm:text-sm">
-                <input type="number" min="1" value="${qty}" required class="item-qty w-16 sm:w-20 p-1.5 border rounded dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-amazon-orange text-xs sm:text-sm">
-                <button type="button" onclick="document.getElementById('row-${rowId}').remove()" class="p-1.5 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-            `;
-            container.appendChild(div);
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-
-            const editId = document.getElementById('editOrderId').value;
-            const requester = document.getElementById('formRequester').value;
-            const floor = document.getElementById('formFloor').value;
-            const room = document.getElementById('formRoom').value;
-            const time = document.getElementById('formTime').value;
-            const eventType = document.getElementById('formEventType').value;
-            const priority = document.getElementById('formPriority').value;
-            const notes = document.getElementById('formNotes').value;
-
-            // Extract custom items
-            const itemElements = document.querySelectorAll('#itemRows > div');
-            const items = [];
-            itemElements.forEach(row => {
-                const name = row.querySelector('.item-name').value;
-                const qty = row.querySelector('.item-qty').value;
-                if (name.trim()) {
-                    items.push({ name, qty: Number(qty) });
-                }
-            });
-
-            if (items.length === 0) {
-                alert("Please add at least one order item.");
-                return;
-            }
-
-            if (editId) {
-                // Update Order
-                const idx = orders.findIndex(o => o.id === editId);
-                if (idx !== -1) {
-                    orders[idx] = { ...orders[idx], requester, floor, room, time, eventType, priority, items, notes };
-                    addNotification(`Order ${editId} updated.`);
-                }
-            } else {
-                // New Order
-                const newId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-                orders.unshift({
-                    id: newId,
-                    requester,
-                    floor,
-                    room,
-                    time,
-                    eventType,
-                    priority,
-                    items,
-                    notes,
-                    status: 'Pending',
-                    timestamp: new Date().toISOString()
-                });
-                addNotification(`New order created: ${newId}`);
-            }
-
-            closeOrderModal();
-            renderAllViews();
-        }
-
-        function editOrder(id) {
-            openOrderModal(id);
-        }
-
-        function deleteOrder(id) {
-            if (confirm(`Are you sure you want to delete order ${id}?`)) {
-                orders = orders.filter(o => o.id !== id);
-                addNotification(`Order ${id} deleted.`);
-                renderAllViews();
-            }
-        }
-
-        // SLIP & QR MODAL
-        function openSlipModal(id) {
-            const order = orders.find(o => o.id === id);
-            if (!order) return;
-
-            document.getElementById('slipOrderId').textContent = order.id;
-            document.getElementById('slipRequester').textContent = order.requester;
-            document.getElementById('slipLocation').textContent = `${order.floor}, ${order.room}`;
-            document.getElementById('slipTime').textContent = order.time;
-            document.getElementById('slipNotes').textContent = order.notes || 'None';
-
-            const itemsList = document.getElementById('slipItems');
-            itemsList.innerHTML = order.items.map(i => `
-                <li class="flex justify-between border-b border-dashed dark:border-slate-700 pb-1">
-                    <span>${i.name}</span>
-                    <span class="font-bold">x${i.qty}</span>
-                </li>
-            `).join('');
-
-            // Generate QR Code
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: `https://compass-blr26.internal/tracker?id=${order.id}`,
-                width: 96,
-                height: 96,
-                colorDark: "#131921",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            document.getElementById('slipModal').classList.remove('hidden');
-        }
-
-        function closeSlipModal() {
-            document.getElementById('slipModal').classList.add('hidden');
+            if (statusChart) statusChart.update();
+            if (itemsChart) itemsChart.update();
+            if (trendChart) trendChart.update();
         }
     </script>
 </body>
