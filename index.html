@@ -224,11 +224,10 @@
                         <span id="badge-Preparing" class="bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
                     </div>
                     <div id="col-Preparing" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar"></div>
-                </div>
-
-                <div class="bg-gray-200/60 dark:bg-slate-800/60 p-3 rounded-xl border border-gray-200 dark:border-slate-700 kanban-col flex flex-col" ondragover="allowDrop(event)" ondrop="drop(event, 'Ready')">
+                        </div>
+                                        <div class="bg-gray-200/60 dark:bg-slate-800/60 p-3 rounded-xl border border-gray-200 dark:border-slate-700 kanban-col flex flex-col" ondragover="allowDrop(event)" ondrop="drop(event, 'Ready')">
                     <div class="flex items-center justify-between mb-3 px-1">
-                        <span class="font-bold text-sm text-purple-600 dark:text-purple-400 uppercase tracking-wider"><i class="fa-solid fa-box-check mr-1.5"></i>Ready</span>
+                        <span class="font-bold text-sm text-purple-600 dark:text-purple-400 uppercase tracking-wider"><i class="fa-solid fa-bell-concierge mr-1.5"></i>Ready</span>
                         <span id="badge-Ready" class="bg-purple-200 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
                     </div>
                     <div id="col-Ready" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar"></div>
@@ -252,24 +251,24 @@
             </div>
         </section>
 
-        <!-- VIEW 3: ORDERS TABLE -->
+        <!-- VIEW 3: TABLE LIST -->
         <section id="view-table" class="hidden">
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+                <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 dark:bg-slate-700 text-xs uppercase font-semibold text-gray-500 dark:text-gray-300">
+                        <thead class="bg-gray-50 dark:bg-slate-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">
                             <tr>
-                                <th class="p-4">Order ID</th>
-                                <th class="p-4">Requester & Location</th>
-                                <th class="p-4">Delivery Time</th>
-                                <th class="p-4">Priority</th>
-                                <th class="p-4">Items Summary</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4 text-right">Actions</th>
+                                <th class="p-3">Order ID</th>
+                                <th class="p-3">Requester & Event</th>
+                                <th class="p-3">Location</th>
+                                <th class="p-3">Items Summary</th>
+                                <th class="p-3">Delivery Time</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="ordersTableBody" class="divide-y divide-gray-200 dark:divide-slate-700">
-                            <!-- JS Injected Rows -->
+                        <tbody id="ordersTableBody" class="divide-y divide-gray-100 dark:divide-slate-700">
+                            <!-- Injected dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -278,31 +277,704 @@
 
     </main>
 
-    <!-- NEW / EDIT ORDER MODAL -->
-    <div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <!-- Modal Header -->
-            <div class="bg-amazon-navy text-white p-4 flex justify-between items-center">
-                <h3 class="font-bold text-lg" id="modalTitle">Create Pantry / Catering Order</h3>
-                <button onclick="closeOrderModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+    <!-- NEW ORDER MODAL -->
+    <div id="orderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="p-4 bg-amazon-navy text-white flex justify-between items-center">
+                <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-cart-plus text-amazon-orange"></i> Create New Hospitality Order</h3>
+                <button onclick="closeOrderModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
-            <!-- Modal Form Body -->
-            <form id="orderForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar space-y-4">
-                <input type="hidden" id="formOrderId">
+            <form id="orderForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-sm">
+                <input type="hidden" id="editOrderId">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">Requester Name *</label>
-                        <input type="text" id="reqName" required class="w-full px-3 py-2 text-sm rounded border border-gray-300 dark:border-slate-600 bg-transparent" placeholder="e.g. Rupanjana">
+                        <label class="block font-semibold mb-1">Requester Name *</label>
+                        <input type="text" id="formRequester" required placeholder="e.g. Rahul Sharma" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">Department *</label>
-                        <input type="text" id="reqDept" required class="w-full px-3 py-2 text-sm rounded border border-gray-300 dark:border-slate-600 bg-transparent" placeholder="e.g. AWS Operations">
+                        <label class="block font-semibold mb-1">Department / Team *</label>
+                        <input type="text" id="formDept" required placeholder="e.g. AWS Security" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-semibold mb-1">Floor *</label>
+                        <select id="formFloor" required class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600">
+                            <option value="Floor 1">Floor 1</option>
+                            <option value="Floor 2">Floor 2</option>
+                            <option value="Floor 3">Floor 3</option>
+                            <option value="Floor 4">Floor 4</option>
+                            <option value="Floor 5">Floor 5</option>
+                            <option value="Floor 6">Floor 6</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">Priority</label>
-                        <select id="reqPriority" class="w-full px-3 py-2 text-sm rounded border border-gray-300 dark:border-slate-600 bg-transparent">
-                            <option value="Low">Low</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="High
+                        <label class="block font-semibold mb-1">Meeting Room / Hub *</label>
+                        <input type="text" id="formRoom" required placeholder="e.g. Conference Room A" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">Target Delivery Time *</label>
+                        <input type="time" id="formTime" required class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold mb-1">Event Type *</label>
+                        <select id="formEventType" required class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600">
+                            <option value="Standard Meeting">Standard Meeting</option>
+                            <option value="VIP Event">VIP Event</option>
+                            <option value="Townhall">Townhall</option>
+                            <option value="Training Session">Training Session</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">Priority Level</label>
+                        <select id="formPriority" class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600">
+                            <option value="Normal">Normal</option>
+                            <option value="High">High Priority</option>
+                            <option value="Urgent">Urgent / VIP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Item Selector Dynamic Table -->
+                <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-3 bg-gray-50 dark:bg-slate-900/50">
+                    <label class="block font-bold text-xs uppercase text-gray-500 mb-2">Order Items</label>
+                    <div id="itemRows" class="space-y-2">
+                        <!-- Dynamic items injected here -->
+                    </div>
+                    <button type="button" onclick="addItemRow()" class="mt-3 text-xs text-amazon-blue hover:underline font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-plus-circle"></i> Add Item
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-1">Special Instructions</label>
+                    <textarea id="formNotes" rows="2" placeholder="e.g. Extra sugar sachets on the side, hot water separately..." class="w-full p-2 border rounded dark:bg-slate-700 dark:border-slate-600"></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-gray-200 dark:border-slate-700 flex justify-end space-x-3">
+                    <button type="button" onclick="closeOrderModal()" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-700">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-amazon-orange hover:bg-amazon-accent text-amazon-navy font-bold rounded shadow">Save Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ORDER DETAILS / SLIP MODAL -->
+    <div id="slipModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 bg-amazon-navy text-white flex justify-between items-center">
+                <h3 class="font-bold">Order Slip & QR Code</h3>
+                <button onclick="closeSlipModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-4" id="printableSlip">
+                <div class="text-center border-b pb-4 dark:border-slate-700">
+                    <h2 class="text-xl font-black text-amazon-navy dark:text-amazon-orange">COMPASS GROUP INDIA</h2>
+                    <p class="text-xs text-gray-500">Amazon BLR 26 Hospitality Desk</p>
+                    <div id="slipOrderId" class="mt-2 text-lg font-mono font-bold text-slate-800 dark:text-slate-200"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div><span class="text-gray-500">Requester:</span> <p id="slipRequester" class="font-bold"></p></div>
+                    <div><span class="text-gray-500">Dept:</span> <p id="slipDept" class="font-bold"></p></div>
+                    <div><span class="text-gray-500">Location:</span> <p id="slipLocation" class="font-bold"></p></div>
+                    <div><span class="text-gray-500">Delivery Time:</span> <p id="slipTime" class="font-bold text-amazon-blue"></p></div>
+                </div>
+
+                <div class="border-t border-b py-3 dark:border-slate-700">
+                    <h4 class="text-xs font-bold uppercase text-gray-500 mb-2">Requested Items</h4>
+                    <ul id="slipItems" class="space-y-1 text-sm font-medium"></ul>
+                </div>
+
+                <div class="text-xs">
+                    <span class="text-gray-500">Instructions:</span>
+                    <p id="slipNotes" class="italic text-gray-700 dark:text-gray-300 mt-1"></p>
+                </div>
+
+                <!-- QR Code Container -->
+                <div class="flex flex-col items-center justify-center pt-2">
+                    <div id="qrcode" class="p-2 bg-white rounded border"></div>
+                    <p class="text-[10px] text-gray-400 mt-1">Scan for Instant Status Update</p>
+                </div>
+            </div>
+
+            <div class="p-4 bg-gray-50 dark:bg-slate-700/50 flex justify-end space-x-3 border-t dark:border-slate-700">
+                <button onclick="window.print()" class="px-4 py-2 bg-amazon-navy text-white text-xs font-bold rounded flex items-center gap-1.5 hover:bg-slate-800">
+                    <i class="fa-solid fa-print"></i> Print Slip
+                </button>
+            </div>
+        </div>
+                </div>
+                        <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // INITIAL STATE & MOCK DATA
+        let orders = [
+            {
+                id: "ORD-1001",
+                requester: "Amit Verma",
+                dept: "AWS Dev",
+                floor: "Floor 3",
+                room: "Conf Room 3B",
+                time: "10:30",
+                eventType: "Standard Meeting",
+                priority: "Normal",
+                items: [{ name: "Masala Chai", qty: 5 }, { name: "Biscuits Packet", qty: 2 }],
+                notes: "Less sugar for tea",
+                status: "Pending",
+                timestamp: new Date().toISOString()
+            },
+            {
+                id: "ORD-1002",
+                requester: "Priya Nair",
+                dept: "HR Team",
+                floor: "Floor 5",
+                room: "Boardroom",
+                time: "11:00",
+                eventType: "VIP Event",
+                priority: "Urgent",
+                items: [{ name: "Cappuccino", qty: 8 }, { name: "Assorted Cookies", qty: 3 }, { name: "Fresh Juice", qty: 4 }],
+                notes: "VIP Guest visiting from Seattle",
+                status: "Preparing",
+                timestamp: new Date().toISOString()
+            },
+            {
+                id: "ORD-1003",
+                requester: "Siddharth Rao",
+                dept: "Operations",
+                floor: "Floor 2",
+                room: "Training Room 1",
+                time: "09:45",
+                eventType: "Training Session",
+                priority: "High",
+                items: [{ name: "Filter Coffee", qty: 12 }],
+                notes: "Serve hot",
+                status: "Ready",
+                timestamp: new Date().toISOString()
+            }
+        ];
+
+        let notifications = [];
+        let currentRole = "Admin";
+        let statusChart, itemsChart, trendChart;
+
+        const AVAILABLE_ITEMS = [
+            "Masala Chai", "Filter Coffee", "Cappuccino", "Green Tea", 
+            "Fresh Juice", "Assorted Cookies", "Biscuits Packet", "Veg Sandwich", "Water Bottles (500ml)"
+        ];
+
+        // INIT APPLICATION
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initCharts();
+            renderAllViews();
+            setupRoleListener();
+            setupNotifListener();
+        });
+
+        // THEME MANAGEMENT
+        function initTheme() {
+            const toggleBtn = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            toggleBtn.addEventListener('click', () => {
+                const html = document.documentElement;
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    icon.className = 'fa-solid fa-moon';
+                } else {
+                    html.classList.add('dark');
+                    icon.className = 'fa-solid fa-sun';
+                }
+                updateChartsTheme();
+            });
+        }
+
+        // ROLE MANAGEMENT
+        function setupRoleListener() {
+            const select = document.getElementById('roleSelect');
+            select.addEventListener('change', (e) => {
+                currentRole = e.target.value;
+                addNotification(`Switched role view to: ${currentRole}`);
+                renderAllViews();
+            });
+        }
+
+        // NOTIFICATION POP OVER
+        function setupNotifListener() {
+            const btn = document.getElementById('notifBtn');
+            const menu = document.getElementById('notifMenu');
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            });
+            document.addEventListener('click', () => menu.classList.add('hidden'));
+        }
+
+        function addNotification(msg) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            notifications.unshift({ msg, time });
+            updateNotifUI();
+        }
+
+        function updateNotifUI() {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+
+            if (notifications.length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-400 py-4">No new notifications</p>`;
+                badge.classList.add('hidden');
+                return;
+            }
+
+            badge.textContent = notifications.length;
+            badge.classList.remove('hidden');
+
+            list.innerHTML = notifications.map(n => `
+                <div class="p-2 rounded bg-gray-50 dark:bg-slate-700/50 flex justify-between items-start">
+                    <span>${n.msg}</span>
+                    <span class="text-[10px] text-gray-400 ml-2">${n.time}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearNotifications() {
+            notifications = [];
+            updateNotifUI();
+        }
+
+        // NAVIGATION TABS
+        function switchView(viewName) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.view-tab').forEach(tab => {
+                tab.className = "view-tab px-4 py-2 font-semibold text-sm text-gray-500 dark:text-gray-400 hover:text-amazon-orange";
+            });
+
+            const activeTab = document.getElementById(`tab-${viewName}`);
+            activeTab.className = "view-tab active px-4 py-2 font-semibold text-sm border-b-2 border-amazon-orange text-amazon-orange";
+        }
+
+        // MAIN RENDER CONTROLLER
+        function renderAllViews() {
+            renderMetrics();
+            renderKanban();
+            renderTable();
+            updateCharts();
+        }
+
+        // METRICS UPDATE
+        function renderMetrics() {
+            const filtered = getFilteredOrders();
+            document.getElementById('m-total').textContent = filtered.length;
+            document.getElementById('m-pending').textContent = filtered.filter(o => o.status === 'Pending').length;
+            document.getElementById('m-preparing').textContent = filtered.filter(o => o.status === 'Preparing').length;
+            document.getElementById('m-ready').textContent = filtered.filter(o => o.status === 'Ready').length;
+            document.getElementById('m-dispatched').textContent = filtered.filter(o => o.status === 'Dispatched').length;
+            document.getElementById('m-completed').textContent = filtered.filter(o => o.status === 'Completed').length;
+            document.getElementById('m-events').textContent = filtered.filter(o => o.eventType === 'VIP Event' || o.eventType === 'Townhall').length;
+        }
+
+        // FILTER LOGIC
+        function getFilteredOrders() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+
+            return orders.filter(o => {
+                const matchesSearch = o.id.toLowerCase().includes(search) ||
+                                      o.requester.toLowerCase().includes(search) ||
+                                      o.floor.toLowerCase().includes(search) ||
+                                      o.room.toLowerCase().includes(search);
+                const matchesStatus = status === 'ALL' || o.status === status;
+                return matchesSearch && matchesStatus;
+            });
+        }
+
+        function applyFilters() {
+            renderAllViews();
+        }
+
+        // KANBAN RENDER & DRAG-DROP
+        function renderKanban() {
+            const statuses = ['Pending', 'Preparing', 'Ready', 'Dispatched', 'Completed'];
+            const filtered = getFilteredOrders();
+
+            statuses.forEach(st => {
+                const col = document.getElementById(`col-${st}`);
+                const badge = document.getElementById(`badge-${st}`);
+                const itemsInSt = filtered.filter(o => o.status === st);
+
+                badge.textContent = itemsInSt.length;
+                col.innerHTML = itemsInSt.map(o => createKanbanCard(o)).join('');
+            });
+        }
+
+        function createKanbanCard(order) {
+            const priorityColors = {
+                'Normal': 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300',
+                'High': 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+                'Urgent': 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
+            };
+
+            const itemsCount = order.items.reduce((sum, item) => sum + Number(item.qty), 0);
+
+            return `
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 cursor-grab active:cursor-grabbing hover:shadow-md transition" 
+                     draggable="true" ondragstart="drag(event, '${order.id}')">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-mono text-xs font-bold text-amazon-blue dark:text-amazon-orange">${order.id}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded font-bold ${priorityColors[order.priority]}">${order.priority}</span>
+                    </div>
+
+                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 leading-snug">${order.requester}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${order.floor} &bull; ${order.room}</p>
+
+                    <div class="my-3 border-t border-b dark:border-slate-700/60 py-2 text-xs space-y-1">
+                        <div class="flex justify-between text-gray-600 dark:text-gray-300">
+                            <span><i class="fa-solid fa-boxes-stacked mr-1"></i>${order.items.length} items (${itemsCount} total)</span>
+                            <span class="font-bold text-amazon-navy dark:text-amazon-orange"><i class="fa-regular fa-clock mr-1"></i>${order.time}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1">
+                        <button onclick="openSlipModal('${order.id}')" class="text-xs text-amazon-blue hover:underline font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-qrcode"></i> Slip / QR
+                        </button>
+                        
+                        ${currentRole === 'Admin' ? `
+                            <div class="flex space-x-1">
+                                <button onclick="editOrder('${order.id}')" class="p-1 text-gray-400 hover:text-blue-500"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteOrder('${order.id}')" class="p-1 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev, id) { ev.dataTransfer.setData("text/plain", id); }
+
+        function drop(ev, targetStatus) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text/plain");
+            const order = orders.find(o => o.id === id);
+            if (order && order.status !== targetStatus) {
+                order.status = targetStatus;
+                addNotification(`Order ${order.id} moved to ${targetStatus}`);
+                renderAllViews();
+            }
+        }
+                // TABLE VIEW RENDER
+        function renderTable() {
+            const tbody = document.getElementById('ordersTableBody');
+            const filtered = getFilteredOrders();
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">No orders found matching your criteria.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(o => {
+                const statusClasses = {
+                    'Pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+                    'Preparing': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+                    'Ready': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
+                    'Dispatched': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
+                    'Completed': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                };
+
+                const itemsSummary = o.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition">
+                        <td class="p-3 font-mono font-bold text-amazon-blue dark:text-amazon-orange">${o.id}</td>
+                        <td class="p-3">
+                            <div class="font-bold">${o.requester}</div>
+                            <div class="text-xs text-gray-400">${o.dept} &bull; ${o.eventType}</div>
+                        </td>
+                        <td class="p-3 text-xs">${o.floor}, ${o.room}</td>
+                        <td class="p-3 text-xs max-w-xs truncate" title="${itemsSummary}">${itemsSummary}</td>
+                        <td class="p-3 font-bold text-xs text-amazon-blue">${o.time}</td>
+                        <td class="p-3">
+                            <select onchange="changeOrderStatus('${o.id}', this.value)" class="text-xs font-bold px-2 py-1 rounded cursor-pointer border-none focus:ring-2 focus:ring-amazon-orange ${statusClasses[o.status]}">
+                                <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Preparing" ${o.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                <option value="Ready" ${o.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                                <option value="Dispatched" ${o.status === 'Dispatched' ? 'selected' : ''}>Dispatched</option>
+                                <option value="Completed" ${o.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                            </select>
+                        </td>
+                        <td class="p-3 text-right">
+                            <button onclick="openSlipModal('${o.id}')" class="p-1 text-amazon-blue hover:text-amazon-orange mr-2" title="View Slip & QR">
+                                <i class="fa-solid fa-qrcode"></i>
+                            </button>
+                            ${currentRole === 'Admin' ? `
+                                <button onclick="editOrder('${o.id}')" class="p-1 text-gray-400 hover:text-blue-500 mr-2" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deleteOrder('${o.id}')" class="p-1 text-gray-400 hover:text-red-500" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function changeOrderStatus(id, newStatus) {
+            const order = orders.find(o => o.id === id);
+            if (order) {
+                order.status = newStatus;
+                addNotification(`Order ${id} status updated to ${newStatus}`);
+                renderAllViews();
+            }
+        }
+
+        // CREATE & EDIT ORDER MODAL LOGIC
+        function openOrderModal(editId = null) {
+            const modal = document.getElementById('orderModal');
+            const form = document.getElementById('orderForm');
+            const itemRows = document.getElementById('itemRows');
+            itemRows.innerHTML = '';
+
+            if (editId) {
+                const order = orders.find(o => o.id === editId);
+                document.getElementById('editOrderId').value = order.id;
+                document.getElementById('formRequester').value = order.requester;
+                document.getElementById('formDept').value = order.dept;
+                document.getElementById('formFloor').value = order.floor;
+                document.getElementById('formRoom').value = order.room;
+                document.getElementById('formTime').value = order.time;
+                document.getElementById('formEventType').value = order.eventType;
+                document.getElementById('formPriority').value = order.priority;
+                document.getElementById('formNotes').value = order.notes || '';
+
+                order.items.forEach(item => addItemRow(item.name, item.qty));
+            } else {
+                form.reset();
+                document.getElementById('editOrderId').value = '';
+                addItemRow(); // Default single row
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+        }
+
+        function addItemRow(selectedName = '', qty = 1) {
+            const container = document.getElementById('itemRows');
+            const rowId = Date.now() + Math.random();
+            const div = document.createElement('div');
+            div.className = "flex items-center space-x-2 item-row";
+            div.id = `row-${rowId}`;
+
+            const optionsHtml = AVAILABLE_ITEMS.map(i => `<option value="${i}" ${i === selectedName ? 'selected' : ''}>${i}</option>`).join('');
+
+            div.innerHTML = `
+                <select class="item-name flex-1 p-2 border rounded dark:bg-slate-700 dark:border-slate-600 text-xs">
+                    ${optionsHtml}
+                </select>
+                <input type="number" min="1" value="${qty}" class="item-qty w-20 p-2 border rounded dark:bg-slate-700 dark:border-slate-600 text-xs" placeholder="Qty">
+                <button type="button" onclick="removeItemRow('row-${rowId}')" class="text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeItemRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row && document.querySelectorAll('.item-row').length > 1) {
+                row.remove();
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editOrderId').value;
+
+            // Gather item rows
+            const itemElements = document.querySelectorAll('.item-row');
+            const items = [];
+            itemElements.forEach(row => {
+                const name = row.querySelector('.item-name').value;
+                const qty = Number(row.querySelector('.item-qty').value);
+                items.push({ name, qty });
+            });
+
+            const orderData = {
+                id: editId || `ORD-${1000 + orders.length + 1}`,
+                requester: document.getElementById('formRequester').value,
+                dept: document.getElementById('formDept').value,
+                floor: document.getElementById('formFloor').value,
+                room: document.getElementById('formRoom').value,
+                time: document.getElementById('formTime').value,
+                eventType: document.getElementById('formEventType').value,
+                priority: document.getElementById('formPriority').value,
+                notes: document.getElementById('formNotes').value,
+                items: items,
+                status: editId ? (orders.find(o => o.id === editId)?.status || 'Pending') : 'Pending',
+                timestamp: new Date().toISOString()
+            };
+
+            if (editId) {
+                const index = orders.findIndex(o => o.id === editId);
+                orders[index] = orderData;
+                addNotification(`Order ${editId} updated successfully.`);
+            } else {
+                orders.unshift(orderData);
+                addNotification(`New order ${orderData.id} created for ${orderData.requester}`);
+            }
+
+            closeOrderModal();
+            renderAllViews();
+        }
+
+        function editOrder(id) {
+            openOrderModal(id);
+        }
+
+        function deleteOrder(id) {
+            if (confirm(`Are you sure you want to delete order ${id}?`)) {
+                orders = orders.filter(o => o.id !== id);
+                addNotification(`Order ${id} was deleted.`);
+                renderAllViews();
+            }
+        }
+
+        // SLIP & QR MODAL LOGIC
+        function openSlipModal(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            document.getElementById('slipOrderId').textContent = order.id;
+            document.getElementById('slipRequester').textContent = order.requester;
+            document.getElementById('slipDept').textContent = order.dept;
+            document.getElementById('slipLocation').textContent = `${order.floor}, ${order.room}`;
+            document.getElementById('slipTime').textContent = order.time;
+            document.getElementById('slipNotes').textContent = order.notes || 'None';
+
+            const itemsContainer = document.getElementById('slipItems');
+            itemsContainer.innerHTML = order.items.map(i => `
+                <li class="flex justify-between border-b border-dashed dark:border-slate-700 pb-1">
+                    <span>${i.name}</span>
+                    <span class="font-bold">x${i.qty}</span>
+                </li>
+            `).join('');
+
+            // Render QR Code
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: JSON.stringify({ id: order.id, status: order.status, requester: order.requester }),
+                width: 90,
+                height: 90,
+                colorDark : "#131921",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('slipModal').classList.remove('hidden');
+        }
+
+        function closeSlipModal() {
+            document.getElementById('slipModal').classList.add('hidden');
+        }
+
+        // CHARTS LOGIC (CHART.JS)
+        function initCharts() {
+            const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+            const ctxItems = document.getElementById('chartItems').getContext('2d');
+            const ctxTrend = document.getElementById('chartTrend').getContext('2d');
+
+            statusChart = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Preparing', 'Ready', 'Dispatched', 'Completed'],
+                    datasets: [{
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: ['#eab308', '#3b82f6', '#a855f7', '#6366f1', '#22c55e']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            itemsChart = new Chart(ctxItems, {
+                type: 'bar',
+                data: {
+                    labels: AVAILABLE_ITEMS.slice(0, 5),
+                    datasets: [{
+                        label: 'Quantity Requested',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: '#ff9900'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            trendChart = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+                    datasets: [{
+                        label: 'Orders Volume',
+                        data: [1, 3, 2, 5, 4, 2],
+                        borderColor: '#007185',
+                        tension: 0.3,
+                        fill: false
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function updateCharts() {
+            if (!statusChart || !itemsChart) return;
+
+            const filtered = getFilteredOrders();
+            const counts = ['Pending', 'Preparing', 'Ready', 'Dispatched', 'Completed'].map(st => 
+                filtered.filter(o => o.status === st).length
+            );
+
+            statusChart.data.datasets[0].data = counts;
+            statusChart.update();
+
+            // Calculate Item Totals
+            const itemTotals = {};
+            AVAILABLE_ITEMS.forEach(i => itemTotals[i] = 0);
+            filtered.forEach(o => {
+                o.items.forEach(i => {
+                    if (itemTotals[i.name] !== undefined) {
+                        itemTotals[i.name] += Number(i.qty);
+                    }
+                });
+            });
+
+            itemsChart.data.labels = Object.keys(itemTotals);
+            itemsChart.data.datasets[0].data = Object.values(itemTotals);
+            itemsChart.update();
+        }
+
+        function updateChartsTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const color = isDark ? '#f8fafc' : '#334155';
+            
+            [statusChart, itemsChart, trendChart].forEach(chart => {
+                if (chart && chart.options.plugins.legend) {
+                    chart.options.plugins.legend.labels = { color: color };
+                    chart.update();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
